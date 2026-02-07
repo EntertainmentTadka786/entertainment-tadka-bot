@@ -1,54 +1,22 @@
-# Security Headers
-Header always set X-Content-Type-Options "nosniff"
-Header always set X-Frame-Options "DENY"
-Header always set X-XSS-Protection "1; mode=block"
-Header always set Referrer-Policy "strict-origin-when-cross-origin"
+# .env
+# Telegram Bot Configuration
+BOT_TOKEN=your_bot_token_here
+ADMIN_ID=your_admin_id_here
 
-# Force HTTPS
-RewriteEngine On
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+# Render.com Specific
+PORT=8080
+RENDER_EXTERNAL_URL=https://your-app-name.onrender.com
 
-# Hide .env file
-<Files ".env">
-    Order Allow,Deny
-    Deny from all
-</Files>
+# Bot Settings
+MAINTENANCE_MODE=false
+DAILY_REQUEST_LIMIT=5
+CACHE_EXPIRY=300
 
-# Hide sensitive files
-<FilesMatch "^(\.env|\.git|composer\.json|composer\.lock|Dockerfile|docker-compose\.yml|render\.yaml|README\.md|bot_activity\.log|error\.log|movies\.csv|users\.json|bot_stats\.json|movie_requests\.json)$">
-    Order Allow,Deny
-    Deny from all
-</FilesMatch>
-
-# Allow only necessary file types
-<FilesMatch "\.(php|css|js|png|jpg|jpeg|gif|ico|txt|xml)$">
-    Order Allow,Deny
-    Allow from all
-</FilesMatch>
-
-# Prevent directory listing
-Options -Indexes
-
-# Custom error pages
-ErrorDocument 403 /error.php?code=403
-ErrorDocument 404 /error.php?code=404
-ErrorDocument 500 /error.php?code=500
-
-# Compression
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript
-</IfModule>
-
-# Cache control
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType text/html "access plus 1 hour"
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType text/javascript "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/png "access plus 1 year"
-    ExpiresByType image/gif "access plus 1 year"
-    ExpiresByType image/ico "access plus 1 year"
-</IfModule>
+# Channels (Yeh values index.php mein already defined hain, yahan override karne ke liye)
+# MAIN_CHANNEL=@EntertainmentTadka786
+# MAIN_CHANNEL_ID=-1003251791991
+# THEATER_CHANNEL=@threater_print_movies
+# THEATER_CHANNEL_ID=-1003614546520
+# BACKUP_CHANNEL_USERNAME=@ETBackup
+# BACKUP_CHANNEL_ID=-1002337293281
+# REQUEST_CHANNEL=@EntertainmentTadka7860

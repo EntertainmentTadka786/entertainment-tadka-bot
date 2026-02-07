@@ -1,90 +1,39 @@
 
-## 10. `.gitignore`
+## 10. **.gitignore**
 
 ```gitignore
+# .gitignore
+
 # Environment variables
 .env
 .env.local
-.env.*.local
+.env.production
 
-# Logs
-error.log
-bot_activity.log
-*.log
-logs/
+# Data files (Render.com pe disk mount karega)
+/movies.csv
+/users.json
+/bot_stats.json
+/movie_requests.json
+/bot_activity.log
+/backups/
 
-# Backup files
-backups/
-*.bak
-*.backup
+# Composer
+/vendor/
+composer.lock
 
-# CSV files (can be large)
-movies.csv
-
-# JSON data files
-users.json
-bot_stats.json
-movie_requests.json
-
-# System files
-.DS_Store
-Thumbs.db
+# IDE files
+.idea/
+.vscode/
 *.swp
 *.swo
 
-# IDE files
-.vscode/
-.idea/
-*.iml
+# OS files
+.DS_Store
+Thumbs.db
 
-# Composer
-vendor/
-composer.lock
-
-# Node.js
-node_modules/
-package-lock.json
+# Logs
+*.log
+php_errors.log
 
 # Docker
-.dockerignore
-
-# Temporary files
-tmp/
-temp/
-
-# Runtime data
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory
-coverage/
-
-# Development tools
-phpunit.xml
-*.test.php
-
-# OS generated files
-ehthumbs.db
-Icon?
-._*
-
-# Thumbnails
-._*
-
-# Files that might appear on external disk
-.Spotlight-V100
-.Trashes
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-
-# PHP
-.phpunit.result.cache
-
-# Local Overrides
-*.local.php
+docker-compose.override.yml

@@ -1,28 +1,46 @@
-# 🎬 Entertainment Tadka Telegram Bot
+# Entertainment Tadka Telegram Bot
 
-A powerful Telegram bot for movie search and delivery with multi-channel support, smart search, and comprehensive management features.
+A Telegram bot for managing and sharing movies across multiple channels.
 
-## 🚀 Features
+## Features
+- 🤖 Multi-channel movie management
+- 🔍 Smart movie search with fuzzy matching
+- 📁 CSV-based movie database
+- 📊 User statistics and leaderboard
+- 🔄 Automatic backups to Telegram channel
+- 🎯 Multi-language support (Hindi/English/Hinglish)
 
-### 📱 Core Features
-- **Smart Movie Search** with fuzzy matching and "Did You Mean" suggestions
-- **Multi-language Support** (English/Hindi/Hinglish)
-- **Typing Indicators** for better UX
-- **6 Channel Support** with smart forwarding control
-- **Locked CSV Format** (movie_name, message_id, channel_id)
+## Setup on Render.com
 
-### 📊 Management Features
-- **User Points System** with leaderboard
-- **Movie Request System** with daily limits
-- **Auto-notification** for requested movies
-- **Comprehensive Statistics**
-- **Admin Dashboard**
+### 1. Prerequisites
+- Telegram Bot Token from @BotFather
+- Admin User ID
+- Render.com account
 
-### 🔧 Technical Features
-- **Automatic Backups** with channel upload
-- **Maintenance Mode**
-- **Rate Limiting**
-- **Error Logging**
-- **Health Checks**
+### 2. Deployment Steps
 
-## 🏗️ Architecture
+#### Step 1: Fork/Create Repository
+Create a new Git repository with all the configuration files.
+
+#### Step 2: Render.com Setup
+1. Go to [Render.com](https://render.com)
+2. Click "New +" → "Web Service"
+3. Connect your GitHub/GitLab repository
+4. Configure service:
+   - **Name**: `telegram-bot`
+   - **Environment**: `Docker`
+   - **Plan**: `Free`
+   - **Dockerfile Path**: `./Dockerfile`
+   - **Port**: `8080`
+
+#### Step 3: Environment Variables
+Add these environment variables in Render.com dashboard:
+- `BOT_TOKEN` = Your Telegram bot token
+- `ADMIN_ID` = Your Telegram user ID
+- `PORT` = `8080`
+
+#### Step 4: Deploy
+Click "Create Web Service" and wait for deployment.
+
+#### Step 5: Set Webhook
+Once deployed, set the webhook:

@@ -1,52 +1,21 @@
+# render.yaml
 services:
   - type: web
-    name: entertainment-tadka-bot
-    env: php
-    region: singapore  # or oregon, frankfurt, etc.
-    plan: free  # or starter, standard, pro
-    buildCommand: |
-      chmod +x bot.php
-      if [ -f "composer.json" ]; then composer install --no-dev --optimize-autoloader; fi
-      mkdir -p backups
-      chmod 777 backups
-    startCommand: php -S 0.0.0.0:$PORT bot.php
+    name: telegram-bot
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    port: 8080
     envVars:
+      - key: PORT
+        value: 8080
       - key: BOT_TOKEN
         sync: false
       - key: ADMIN_ID
         sync: false
-      - key: MAIN_CHANNEL_ID
-        value: -1003251791991
-      - key: THEATER_CHANNEL_ID
-        value: -1003614546520
-      - key: BACKUP_CHANNEL_ID
-        value: -1002337293281
-      - key: PORT
-        value: 10000
-    healthCheckPath: /?health=1
+    healthCheckPath: /
     autoDeploy: true
     disk:
-      name: backups
-      mountPath: /opt/render/project/src/backups
+      name: data
+      mountPath: /var/www/html
       sizeGB: 1
-
-  # Optional: Cron service for scheduled tasks
-  - type: cron
-    name: bot-maintenance
-    schedule: "0 3 * * *"  # Daily at 3 AM
-    startCommand: php bot.php --cron
-    envVars:
-      - key: BOT_TOKEN
-        fromService:
-          type: web
-          name: entertainment-tadka-bot
-          envVarKey: BOT_TOKEN
-      - key: ADMIN_ID
-        fromService:
-          type: web
-          name: entertainment-tadka-bot
-          envVarKey: ADMIN_ID
-
-databases:
-  - name: botdb  # Optional for future use
-    plan: free
