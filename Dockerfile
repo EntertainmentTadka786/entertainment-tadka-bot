@@ -1,5 +1,4 @@
-# Dockerfile - MINIMAL VERSION
-
+# Dockerfile - UPDATED WITH APACHE CONFIG
 FROM php:8.2-apache
 
 # Install dependencies
@@ -12,6 +11,10 @@ RUN a2enmod rewrite headers
 
 # Set working directory
 WORKDIR /var/www/html
+
+# Copy Apache configuration
+COPY apache.conf /etc/apache2/conf-available/custom.conf
+RUN a2enconf custom
 
 # Copy files
 COPY . .
