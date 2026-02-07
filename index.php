@@ -20,12 +20,13 @@ foreach ($required_files as $file => $content) {
 }
 
 // Set permissions
-chmod('backups', 0777);
-foreach (['movies.csv', 'users.json', 'bot_stats.json', 'movie_requests.json', 'bot_activity.log', 'requests.json'] as $file) {
-    if (file_exists($file)) {
-        chmod($file, 0666);
-    }
-}
+// Remove or comment these lines:
+// chmod('backups', 0777);
+// foreach (['movies.csv', 'users.json', 'bot_stats.json', 'movie_requests.json', 'bot_activity.log', 'requests.json'] as $file) {
+//     if (file_exists($file)) {
+//         chmod($file, 0666);
+//     }
+// }
 
 // ==============================
 // RENDER.COM SPECIFIC STARTUP
