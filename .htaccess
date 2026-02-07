@@ -1,22 +1,76 @@
-# .env
-# Telegram Bot Configuration
-BOT_TOKEN=your_bot_token_here
-ADMIN_ID=your_admin_id_here
+# .htaccess - CORRECTED VERSION
 
-# Render.com Specific
-PORT=8080
-RENDER_EXTERNAL_URL=https://your-app-name.onrender.com
+# Enable rewrite engine
+RewriteEngine On
 
-# Bot Settings
-MAINTENANCE_MODE=false
-DAILY_REQUEST_LIMIT=5
-CACHE_EXPIRY=300
+# Security headers - Apache syntax
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "DENY"
+Header set X-XSS-Protection "1; mode=block"
+Header set Referrer-Policy "strict-origin-when-cross-origin"
 
-# Channels (Yeh values index.php mein already defined hain, yahan override karne ke liye)
-# MAIN_CHANNEL=@EntertainmentTadka786
-# MAIN_CHANNEL_ID=-1003251791991
-# THEATER_CHANNEL=@threater_print_movies
-# THEATER_CHANNEL_ID=-1003614546520
-# BACKUP_CHANNEL_USERNAME=@ETBackup
-# BACKUP_CHANNEL_ID=-1002337293281
-# REQUEST_CHANNEL=@EntertainmentTadka7860
+# Handle Telegram webhook
+RewriteCond %{REQUEST_METHOD} POST
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Allow access to files
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Disable directory listing
+Options -Indexes
+
+# Protect sensitive files (Apache 2.4 syntax)
+<IfModule mod_authz_core.c>
+    <FilesMatch "^(\.env|\.htaccess|movies\.csv|users\.json|bot_stats\.json|movie_requests\.json|bot_activity\.log)$">
+        Require all denied
+    </FilesMatch>
+    
+    # Allow access to index.php and public files
+    <Files "index.php">
+        Require all granted
+    </Files>
+    <Files "movies.csv">
+        Require all granted
+    </Files>
+    <Files "*.json">
+        Require all granted
+    </Files>
+</IfModule>
+
+# For Apache 2.2 compatibility
+<IfModule !mod_authz_core.c>
+    <FilesMatch "^(\.env|\.htaccess|movies\.csv|users\.json|bot_stats\.json|movie_requests\.json|bot_activity\.log)$">
+        Order Allow,Deny
+        Deny from all
+    </FilesMatch>
+    
+    # Allow access to index.php and public files
+    <Files "index.php">
+        Order Allow,Deny
+        Allow from all
+    </Files>
+    <Files "movies.csv">
+        Order Allow,Deny
+        Allow from all
+    </Files>
+    <Files "*.json">
+        Order Allow,Deny
+        Allow from all
+    </Files>
+</IfModule>
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Prevent access to hidden files
+RedirectMatch 404 /\.git
+RedirectMatch 404 /\.env
+RedirectMatch 404 /\.htaccess
+
+# Set PHP variables via .htaccess (if needed)
+# php_value upload_max_filesize 100M
+# php_value post_max_size 100M
+# php_value memory_limit 256M
+# php_value max_execution_time 300
