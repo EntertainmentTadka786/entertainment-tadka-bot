@@ -162,32 +162,87 @@ header("Content-Type: application/json");  // Default content type
 // Webhook URL automatically set karo
 $webhook_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 
+// ==============================
+// ENVIRONMENT VARIABLES CONFIGURATION - FORMAT LOCKED
+// ==============================
+
 // Security - All credentials environment variables se lo
 if (!getenv('BOT_TOKEN')) {
-    // Log error
     error_log("❌ BOT_TOKEN environment variable set nahi hai. Render.com dashboard mein set karo.");
-    // Return minimal response
     echo json_encode(['ok' => false, 'error' => 'BOT_TOKEN not configured']);
     exit;
 }
 
 // ==============================
-// ENVIRONMENT VARIABLES CONFIGURATION
+// CHANNELS CONFIGURATION - FORMAT LOCKED
 // ==============================
-// Yeh sab variables Render.com ke dashboard mein set karne hain
-define('BOT_TOKEN', getenv('BOT_TOKEN'));  // Telegram bot token
 
-// ALL CHANNELS DEFINED HERE
-define('MAIN_CHANNEL', '@EntertainmentTadka786');  // Main channel username
-define('MAIN_CHANNEL_ID', '-1003251791991');  // Main channel ID (Private Channel Of Movies and Webseries)
-define('THEATER_CHANNEL', '@threater_print_movies');  // Theater channel username
-define('THEATER_CHANNEL_ID', '-1003614546520');  // Theater channel ID (Forwarded From Any Channel)
-define('BACKUP_CHANNEL_USERNAME', '@ETBackup');  // Backup channel username
-define('BACKUP_CHANNEL_ID', '-1002337293281');  // Backup Channel of Movies And Webseries 2
-define('BACKUP_CHANNEL_2_USERNAME', '@ETBackup');  // Same as above
-define('BACKUP_CHANNEL_2_ID', '-1002337293281');  // Same as above
-define('REQUEST_CHANNEL', '@EntertainmentTadka7860');  // Request channel username
+// 1. PUBLIC CHANNELS DETAILS
+define('MAIN_CHANNEL_USERNAME', '@EntertainmentTadka786');
+define('MAIN_CHANNEL_ID', '-1003181705395');  // Public Channel
+
+define('THEATER_CHANNEL_USERNAME', '@threater_print_movies');
+define('THEATER_CHANNEL_ID', '-1002831605258');  // Public Channel
+
+define('BACKUP_CHANNEL_USERNAME', '@ETBackup');
+define('BACKUP_CHANNEL_ID', '-1002964109368');  // Public Channel
+
+// 2. PRIVATE CHANNELS DETAILS
+define('PRIVATE_CHANNEL_1_ID', '-1003251791991');  // Private Channel
+define('PRIVATE_CHANNEL_2_ID', '-1002337293281');  // Private Channel  
+define('PRIVATE_CHANNEL_3_ID', '-1003614546520');  // Private Channel
+
+// 3. REQUEST GROUP DETAILS
+define('REQUEST_GROUP_USERNAME', '@EntertainmentTadka7860');
+define('REQUEST_GROUP_ID', '-1003083386043');  // Request Group
+
+// Admin user ID
 define('ADMIN_ID', (int)getenv('ADMIN_ID'));  // Admin user ID
+
+// ==============================
+// CHANNEL CONFIGURATION VALIDATION
+// ==============================
+function validate_channel_config() {
+    $required_channels = [
+        'MAIN_CHANNEL_ID' => MAIN_CHANNEL_ID,
+        'THEATER_CHANNEL_ID' => THEATER_CHANNEL_ID,
+        'BACKUP_CHANNEL_ID' => BACKUP_CHANNEL_ID,
+        'REQUEST_CHANNEL_ID' => REQUEST_GROUP_ID
+    ];
+    
+    foreach ($required_channels as $name => $value) {
+        if (empty($value) || !is_numeric(str_replace('-', '', $value))) {
+            error_log("❌ Invalid $name: $value");
+            return false;
+        }
+    }
+    
+    bot_log("Channel configuration validated successfully");
+    return true;
+}
+
+// Validate on startup
+if (!validate_channel_config()) {
+    echo json_encode(['ok' => false, 'error' => 'Invalid channel configuration']);
+    exit;
+}
+
+// ALL CHANNELS DEFINED HERE - UPDATED FORMAT
+define('MAIN_CHANNEL', MAIN_CHANNEL_USERNAME);  // Main channel username
+define('MAIN_CHANNEL_ID', MAIN_CHANNEL_ID);  // Public Channel Of Movies and Webseries
+
+define('THEATER_CHANNEL', THEATER_CHANNEL_USERNAME);  // Theater channel username  
+define('THEATER_CHANNEL_ID', THEATER_CHANNEL_ID);  // Theater channel (Public)
+
+define('BACKUP_CHANNEL_USERNAME', BACKUP_CHANNEL_USERNAME);  // Backup channel username
+define('BACKUP_CHANNEL_ID', BACKUP_CHANNEL_ID);  // Backup Channel of Movies And Webseries (Public)
+
+define('REQUEST_CHANNEL', REQUEST_GROUP_USERNAME);  // Request group username
+define('REQUEST_CHANNEL_ID', REQUEST_GROUP_ID);  // Request group ID
+
+define('PRIVATE_CHANNEL_1', PRIVATE_CHANNEL_1_ID);  // Private channel 1
+define('PRIVATE_CHANNEL_2', PRIVATE_CHANNEL_2_ID);  // Private channel 2  
+define('PRIVATE_CHANNEL_3', PRIVATE_CHANNEL_3_ID);  // Private channel 3
 
 // Validate essential environment variables
 if (!MAIN_CHANNEL_ID || !THEATER_CHANNEL_ID || !BACKUP_CHANNEL_ID) {
@@ -255,28 +310,31 @@ function get_channel_id_by_username($username) {
 }
 
 function get_channel_type_by_id($channel_id) {
-    // Channel ID se channel type return karta hai
+    // Channel ID se channel type return karta hai - UPDATED
     $channel_id = strval($channel_id);
     
+    // Public Channels
     if ($channel_id == MAIN_CHANNEL_ID) return 'main';
     if ($channel_id == THEATER_CHANNEL_ID) return 'theater';
     if ($channel_id == BACKUP_CHANNEL_ID) return 'backup';
-    if ($channel_id == '-1003251791991') return 'private';
-    if ($channel_id == '-1002337293281') return 'backup2';
-    if ($channel_id == '-1003614546520') return 'any';
+    
+    // Private Channels  
+    if ($channel_id == PRIVATE_CHANNEL_1_ID) return 'private1';
+    if ($channel_id == PRIVATE_CHANNEL_2_ID) return 'private2';
+    if ($channel_id == PRIVATE_CHANNEL_3_ID) return 'private3';
     
     return 'other';
 }
 
 function get_channel_display_name($channel_type) {
-    // Channel type se display name return karta hai
+    // Channel type se display name return karta hai - UPDATED
     $names = [
         'main' => '🍿 Main Channel',
-        'theater' => '🎭 Theater Prints',
+        'theater' => '🎭 Theater Prints', 
         'backup' => '🔒 Backup Channel',
-        'private' => '🔐 Private Channel',
-        'backup2' => '💾 Backup 2',
-        'any' => '📡 Any Channel',
+        'private1' => '🔐 Private Channel 1',
+        'private2' => '🔐 Private Channel 2',
+        'private3' => '🔐 Private Channel 3',
         'other' => '📢 Other Channel'
     ];
     
@@ -284,9 +342,13 @@ function get_channel_display_name($channel_type) {
 }
 
 function is_public_channel($channel_type) {
-    // Check karta hai channel public hai ya private
-    $public_channels = ['main', 'theater', 'backup', 'backup2'];
-    return in_array($channel_type, $public_channels);
+    // Check karta hai channel public hai ya private - UPDATED
+    $public_channels = ['main', 'theater', 'backup'];
+    $private_channels = ['private1', 'private2', 'private3'];
+    
+    if (in_array($channel_type, $public_channels)) return true;
+    if (in_array($channel_type, $private_channels)) return false;
+    return false; // default private
 }
 
 // ==============================
@@ -306,11 +368,10 @@ function get_channel_username_link($channel_type) {
     // Channel type se link generate karta hai
     switch ($channel_type) {
         case 'main':
-            return "https://t.me/" . ltrim(MAIN_CHANNEL, '@');
+            return "https://t.me/" . ltrim(MAIN_CHANNEL_USERNAME, '@');
         case 'theater':
-            return "https://t.me/" . ltrim(THEATER_CHANNEL, '@');
+            return "https://t.me/" . ltrim(THEATER_CHANNEL_USERNAME, '@');
         case 'backup':
-        case 'backup2':
             return "https://t.me/" . ltrim(BACKUP_CHANNEL_USERNAME, '@');
         default:
             return "https://t.me/EntertainmentTadka786";
@@ -1031,7 +1092,7 @@ function smart_search($query) {
             }
             
             // Backup channels ko bhi include karo
-            if (in_array($entry_channel_type, ['backup', 'backup2', 'private', 'any'])) {
+            if (in_array($entry_channel_type, ['backup', 'private1', 'private2', 'private3'])) {
                 $score += 5;
             }
         }
@@ -1066,9 +1127,10 @@ function smart_search($query) {
                 'qualities' => array_unique(array_column($entries, 'quality')),
                 'has_theater' => in_array('theater', $channel_types),
                 'has_main' => in_array('main', $channel_types),
-                'has_backup' => in_array('backup', $channel_types) || in_array('backup2', $channel_types),
-                'has_private' => in_array('private', $channel_types),
-                'has_any' => in_array('any', $channel_types),
+                'has_backup' => in_array('backup', $channel_types),
+                'has_private1' => in_array('private1', $channel_types),
+                'has_private2' => in_array('private2', $channel_types),
+                'has_private3' => in_array('private3', $channel_types),
                 'all_channels' => array_unique($channel_types)
             ];
         }
@@ -1155,8 +1217,9 @@ function advanced_search($chat_id, $query, $user_id = null) {
             if ($data['has_theater']) $channel_info .= "🎭 ";
             if ($data['has_main']) $channel_info .= "🍿 ";
             if ($data['has_backup']) $channel_info .= "🔒 ";
-            if ($data['has_private']) $channel_info .= "🔐 ";
-            if ($data['has_any']) $channel_info .= "📡 ";
+            if ($data['has_private1']) $channel_info .= "🔐1 ";
+            if ($data['has_private2']) $channel_info .= "🔐2 ";
+            if ($data['has_private3']) $channel_info .= "🔐3 ";
             $msg .= "$i. $movie ($channel_info" . $data['count'] . " versions, $quality_info)\n";
             $i++;
             if ($i > 10) break;
@@ -1173,8 +1236,9 @@ function advanced_search($chat_id, $query, $user_id = null) {
             $channel_icon = '🍿';
             if ($movie_data['has_theater']) $channel_icon = '🎭';
             elseif ($movie_data['has_backup']) $channel_icon = '🔒';
-            elseif ($movie_data['has_private']) $channel_icon = '🔐';
-            elseif ($movie_data['has_any']) $channel_icon = '📡';
+            elseif ($movie_data['has_private1']) $channel_icon = '🔐1';
+            elseif ($movie_data['has_private2']) $channel_icon = '🔐2';
+            elseif ($movie_data['has_private3']) $channel_icon = '🔐3';
             
             $keyboard['inline_keyboard'][] = [[ 
                 'text' => $channel_icon . ucwords($movie), 
@@ -2302,19 +2366,19 @@ function show_channel_info($chat_id) {
     // All channels ka information show karta hai
     $message = "📢 <b>Join Our Channels</b>\n\n";
     
-    $message .= "🍿 <b>Main Channel:</b> " . MAIN_CHANNEL . "\n";
+    $message .= "🍿 <b>Main Channel:</b> " . MAIN_CHANNEL_USERNAME . "\n";
     $message .= "• Latest movie updates\n";
     $message .= "• Daily new additions\n";
     $message .= "• High quality prints\n";
     $message .= "• Direct downloads\n\n";
     
-    $message .= "📥 <b>Requests Channel:</b> " . REQUEST_CHANNEL . "\n";
+    $message .= "📥 <b>Requests Group:</b> " . REQUEST_GROUP_USERNAME . "\n";
     $message .= "• Movie requests\n";
     $message .= "• Bug reports\n";
     $message .= "• Feature suggestions\n";
     $message .= "• Support & help\n\n";
     
-    $message .= "🎭 <b>Theater Prints:</b> " . THEATER_CHANNEL . "\n";
+    $message .= "🎭 <b>Theater Prints:</b> " . THEATER_CHANNEL_USERNAME . "\n";
     $message .= "• Theater quality prints\n";
     $message .= "• HD screen recordings\n";
     $message .= "• Latest theater prints\n\n";
@@ -2330,11 +2394,11 @@ function show_channel_info($chat_id) {
     $keyboard = [
         'inline_keyboard' => [
             [
-                ['text' => '🍿 ' . MAIN_CHANNEL, 'url' => 'https://t.me/EntertainmentTadka786'],
-                ['text' => '📥 ' . REQUEST_CHANNEL, 'url' => 'https://t.me/EntertainmentTadka7860']
+                ['text' => '🍿 ' . MAIN_CHANNEL_USERNAME, 'url' => 'https://t.me/EntertainmentTadka786'],
+                ['text' => '📥 ' . REQUEST_GROUP_USERNAME, 'url' => 'https://t.me/EntertainmentTadka7860']
             ],
             [
-                ['text' => '🎭 ' . THEATER_CHANNEL, 'url' => 'https://t.me/threater_print_movies'],
+                ['text' => '🎭 ' . THEATER_CHANNEL_USERNAME, 'url' => 'https://t.me/threater_print_movies'],
                 ['text' => '🔒 ' . BACKUP_CHANNEL_USERNAME, 'url' => 'https://t.me/ETBackup']
             ]
         ]
@@ -2345,7 +2409,7 @@ function show_channel_info($chat_id) {
 
 function show_main_channel_info($chat_id) {
     // Main channel ka detailed information
-    $message = "🍿 <b>Main Channel - " . MAIN_CHANNEL . "</b>\n\n";
+    $message = "🍿 <b>Main Channel - " . MAIN_CHANNEL_USERNAME . "</b>\n\n";
     
     $message .= "🎬 <b>What you get:</b>\n";
     $message .= "• Latest Bollywood & Hollywood movies\n";
@@ -2375,14 +2439,14 @@ function show_main_channel_info($chat_id) {
     sendMessage($chat_id, $message, $keyboard, 'HTML');
 }
 
-function show_request_channel_info($chat_id) {
-    // Request channel ka detailed information
-    $message = "📥 <b>Requests Channel - " . REQUEST_CHANNEL . "</b>\n\n";
+function show_request_group_info($chat_id) {
+    // Request group ka detailed information
+    $message = "📥 <b>Requests Group - " . REQUEST_GROUP_USERNAME . "</b>\n\n";
     
     $message .= "🎯 <b>How to request movies:</b>\n";
-    $message .= "1. Join this channel first\n";
+    $message .= "1. Join this group first\n";
     $message .= "2. Use <code>/request movie_name</code> in bot\n";
-    $message .= "3. Or post directly in channel\n";
+    $message .= "3. Or post directly in group\n";
     $message .= "4. We'll add within 24 hours\n\n";
     
     $message .= "📝 <b>Also available:</b>\n";
@@ -2402,7 +2466,7 @@ function show_request_channel_info($chat_id) {
     $keyboard = [
         'inline_keyboard' => [
             [
-                ['text' => '📥 Join Requests Channel', 'url' => 'https://t.me/EntertainmentTadka7860'],
+                ['text' => '📥 Join Requests Group', 'url' => 'https://t.me/EntertainmentTadka7860'],
                 ['text' => '🎬 Request via Bot', 'callback_data' => 'request_help']
             ]
         ]
@@ -2413,7 +2477,7 @@ function show_request_channel_info($chat_id) {
 
 function show_theater_channel_info($chat_id) {
     // Theater channel ka detailed information
-    $message = "🎭 <b>Theater Prints - " . THEATER_CHANNEL . "</b>\n\n";
+    $message = "🎭 <b>Theater Prints - " . THEATER_CHANNEL_USERNAME . "</b>\n\n";
     
     $message .= "🎥 <b>What you get:</b>\n";
     $message .= "• Latest theater prints\n";
@@ -2429,7 +2493,7 @@ function show_theater_channel_info($chat_id) {
     $message .= "• Multiple languages\n\n";
     
     $message .= "📥 <b>How to access:</b>\n";
-    $message .= "1. Join " . THEATER_CHANNEL . "\n";
+    $message .= "1. Join " . THEATER_CHANNEL_USERNAME . "\n";
     $message .= "2. Search in bot\n";
     $message .= "3. Get message IDs\n";
     $message .= "4. Download from channel\n\n";
@@ -3258,9 +3322,9 @@ function show_bot_info($chat_id) {
     $message .= "• Leaderboard\n\n";
     
     $message .= "📢 <b>Channels:</b>\n";
-    $message .= "• Main: " . MAIN_CHANNEL . "\n";
-    $message .= "• Support: " . REQUEST_CHANNEL . "\n";
-    $message .= "• Theater: " . THEATER_CHANNEL;
+    $message .= "• Main: " . MAIN_CHANNEL_USERNAME . "\n";
+    $message .= "• Support: " . REQUEST_GROUP_USERNAME . "\n";
+    $message .= "• Theater: " . THEATER_CHANNEL_USERNAME;
     
     sendMessage($chat_id, $message, null, 'HTML');
 }
@@ -3280,9 +3344,9 @@ function show_support_info($chat_id) {
     $message .= "🎯 <b>Quick Solutions:</b>\n";
     $message .= "1. Use <code>/request movie_name</code> for new movies\n";
     $message .= "2. Check <code>/help</code> for all commands\n";
-    $message .= "3. Join support channel below\n\n";
+    $message .= "3. Join support group below\n\n";
     
-    $message .= "📢 <b>Support Channel:</b> " . REQUEST_CHANNEL . "\n";
+    $message .= "📢 <b>Support Group:</b> " . REQUEST_GROUP_USERNAME . "\n";
     $message .= "👨‍💻 <b>Admin:</b> @EntertainmentTadka0786\n\n";
     
     $message .= "💡 <b>Pro Tip:</b> Always check spelling before reporting!";
@@ -3290,7 +3354,7 @@ function show_support_info($chat_id) {
     $keyboard = [
         'inline_keyboard' => [
             [
-                ['text' => '📢 Support Channel', 'url' => 'https://t.me/EntertainmentTadka0786'],
+                ['text' => '📢 Support Group', 'url' => 'https://t.me/EntertainmentTadka0786'],
                 ['text' => '🐛 Report Bug', 'callback_data' => 'report_bug']
             ],
             [
@@ -3327,7 +3391,7 @@ function show_donate_info($chat_id) {
     $message .= "• Special donor badge\n";
     $message .= "• Increased request limits\n\n";
     
-    $message .= "💌 <b>Contact for other methods:</b> " . REQUEST_CHANNEL;
+    $message .= "💌 <b>Contact for other methods:</b> " . REQUEST_GROUP_USERNAME;
     
     sendMessage($chat_id, $message, null, 'HTML');
 }
@@ -3468,28 +3532,31 @@ function append_movie($movie_name, $message_id_raw, $date = null, $video_path = 
     switch ($channel_type) {
         case 'main':
             $channel_id = MAIN_CHANNEL_ID;
-            $channel_username = MAIN_CHANNEL;
+            $channel_username = MAIN_CHANNEL_USERNAME;
             break;
         case 'theater':
             $channel_id = THEATER_CHANNEL_ID;
-            $channel_username = THEATER_CHANNEL;
+            $channel_username = THEATER_CHANNEL_USERNAME;
             break;
         case 'backup':
-        case 'backup2':
             $channel_id = BACKUP_CHANNEL_ID;
             $channel_username = BACKUP_CHANNEL_USERNAME;
             break;
-        case 'private':
-            $channel_id = '-1003251791991';
-            $channel_username = '@private_channel';
+        case 'private1':
+            $channel_id = PRIVATE_CHANNEL_1_ID;
+            $channel_username = '@private_channel_1';
             break;
-        case 'any':
-            $channel_id = '-1003614546520';
-            $channel_username = '@any_channel';
+        case 'private2':
+            $channel_id = PRIVATE_CHANNEL_2_ID;
+            $channel_username = '@private_channel_2';
+            break;
+        case 'private3':
+            $channel_id = PRIVATE_CHANNEL_3_ID;
+            $channel_username = '@private_channel_3';
             break;
         default:
             $channel_id = MAIN_CHANNEL_ID;
-            $channel_username = MAIN_CHANNEL;
+            $channel_username = MAIN_CHANNEL_USERNAME;
     }
     
     // UPDATED: Only 3 columns as per locked format
@@ -3577,10 +3644,10 @@ function handle_command($chat_id, $user_id, $command, $params = []) {
             $welcome .= "• Non-movie queries\n\n";
             
             $welcome .= "📢 <b>Join Our Channels:</b>\n";
-            $welcome .= "🍿 Main: @EntertainmentTadka786\n";
-            $welcome .= "📥 Requests: @EntertainmentTadka7860\n";
-            $welcome .= "🎭 Theater Prints: @threater_print_movies\n";
-            $welcome .= "🔒 Backup: @ETBackup\n\n";
+            $welcome .= "🍿 Main: " . MAIN_CHANNEL_USERNAME . "\n";
+            $welcome .= "📥 Requests: " . REQUEST_GROUP_USERNAME . "\n";
+            $welcome .= "🎭 Theater Prints: " . THEATER_CHANNEL_USERNAME . "\n";
+            $welcome .= "🔒 Backup: " . BACKUP_CHANNEL_USERNAME . "\n\n";
             
             $welcome .= "🔔 <b>New Feature:</b> Request group gets auto-notification when movies are uploaded!\n\n";
             
@@ -3612,16 +3679,16 @@ function handle_command($chat_id, $user_id, $command, $params = []) {
             $help = "🤖 <b>Entertainment Tadka Bot - Complete Guide</b>\n\n";
             
             $help .= "📢 <b>Our Channels:</b>\n";
-            $help .= "🍿 Main: " . MAIN_CHANNEL . " - Latest movies\n";
-            $help .= "📥 Requests: " . REQUEST_CHANNEL . " - Support & requests\n";
-            $help .= "🎭 Theater: " . THEATER_CHANNEL . " - HD prints\n";
+            $help .= "🍿 Main: " . MAIN_CHANNEL_USERNAME . " - Latest movies\n";
+            $help .= "📥 Requests: " . REQUEST_GROUP_USERNAME . " - Support & requests\n";
+            $help .= "🎭 Theater: " . THEATER_CHANNEL_USERNAME . " - HD prints\n";
             $help .= "🔒 Backup: " . BACKUP_CHANNEL_USERNAME . " - Data protection\n\n";
             
             $help .= "🔔 <b>Auto-notification Feature:</b>\n";
-            $help .= "• Request a movie in request channel\n";
+            $help .= "• Request a movie in request group\n";
             $help .= "• We add it within 24 hours\n";
             $help .= "• Get auto-notification when added!\n";
-            $help .= "• Join request channel for updates\n\n";
+            $help .= "• Join request group for updates\n\n";
             
             $help .= "🎯 <b>Search Commands:</b>\n";
             $help .= "• Just type movie name - Smart search\n";
@@ -3638,7 +3705,7 @@ function handle_command($chat_id, $user_id, $command, $params = []) {
             $help .= "📝 <b>Request Commands:</b>\n";
             $help .= "• <code>/request movie</code> - Request movie\n";
             $help .= "• <code>/myrequests</code> - Request status\n";
-            $help .= "• Join " . REQUEST_CHANNEL . " for support\n\n";
+            $help .= "• Join " . REQUEST_GROUP_USERNAME . " for support\n\n";
             
             $help .= "👤 <b>User Commands:</b>\n";
             $help .= "• <code>/mystats</code> - Your statistics\n";
@@ -3662,11 +3729,11 @@ function handle_command($chat_id, $user_id, $command, $params = []) {
             $keyboard = [
                 'inline_keyboard' => [
                     [
-                        ['text' => '🍿 ' . MAIN_CHANNEL, 'url' => 'https://t.me/EntertainmentTadka786'],
-                        ['text' => '📥 ' . REQUEST_CHANNEL, 'url' => 'https://t.me/EntertainmentTadka7860']
+                        ['text' => '🍿 ' . MAIN_CHANNEL_USERNAME, 'url' => 'https://t.me/EntertainmentTadka786'],
+                        ['text' => '📥 ' . REQUEST_GROUP_USERNAME, 'url' => 'https://t.me/EntertainmentTadka7860']
                     ],
                     [
-                        ['text' => '🎭 ' . THEATER_CHANNEL, 'url' => 'https://t.me/threater_print_movies'],
+                        ['text' => '🎭 ' . THEATER_CHANNEL_USERNAME, 'url' => 'https://t.me/threater_print_movies'],
                         ['text' => '🔒 ' . BACKUP_CHANNEL_USERNAME, 'url' => 'https://t.me/ETBackup']
                     ],
                     [
@@ -3790,7 +3857,7 @@ function handle_command($chat_id, $user_id, $command, $params = []) {
         case '/requestchannel':
         case '/requests':
         case '/support':
-            show_request_channel_info($chat_id);
+            show_request_group_info($chat_id);
             break;
 
         case '/backupchannel':
@@ -4117,10 +4184,12 @@ if ($update) {
             $channel_type = 'theater';
         } elseif ($chat_id == BACKUP_CHANNEL_ID) {
             $channel_type = 'backup';
-        } elseif ($chat_id == '-1003251791991') {
-            $channel_type = 'private';
-        } elseif ($chat_id == '-1003614546520') {
-            $channel_type = 'any';
+        } elseif ($chat_id == PRIVATE_CHANNEL_1_ID) {
+            $channel_type = 'private1';
+        } elseif ($chat_id == PRIVATE_CHANNEL_2_ID) {
+            $channel_type = 'private2';
+        } elseif ($chat_id == PRIVATE_CHANNEL_3_ID) {
+            $channel_type = 'private3';
         } else {
             // Not our known channel, skip
             exit;
@@ -4223,7 +4292,7 @@ if ($update) {
                 $cnt++;
             }
             
-            sendMessage($chat_id, "✅ '$data' ke $cnt items ka info mil gaya!\n\n📢 Join our channel to download: " . MAIN_CHANNEL);
+            sendMessage($chat_id, "✅ '$data' ke $cnt items ka info mil gaya!\n\n📢 Join our channel to download: " . MAIN_CHANNEL_USERNAME);
             answerCallbackQuery($query['id'], "🎬 $cnt items ka info sent!");
             update_user_activity($user_id, 'download');
         }
@@ -4406,8 +4475,8 @@ if ($update) {
             answerCallbackQuery($query['id'], "Request instructions sent");
         }
         elseif ($data === 'request_help') {
-            show_request_channel_info($chat_id);
-            answerCallbackQuery($query['id'], "Request channel info");
+            show_request_group_info($chat_id);
+            answerCallbackQuery($query['id'], "Request group info");
         }
         // User stats
         elseif ($data === 'my_stats') {
@@ -4541,11 +4610,14 @@ if (isset($_GET['test_save'])) {
             case 'backup':
                 $channel_id = BACKUP_CHANNEL_ID;
                 break;
-            case 'private':
-                $channel_id = '-1003251791991';
+            case 'private1':
+                $channel_id = PRIVATE_CHANNEL_1_ID;
                 break;
-            case 'any':
-                $channel_id = '-1003614546520';
+            case 'private2':
+                $channel_id = PRIVATE_CHANNEL_2_ID;
+                break;
+            case 'private3':
+                $channel_id = PRIVATE_CHANNEL_3_ID;
                 break;
         }
         
@@ -4570,11 +4642,12 @@ if (isset($_GET['test_save'])) {
     manual_save_to_csv("KGF Chapter 2 (2022) Theater Print", 1929, "theater");
     manual_save_to_csv("Pushpa 2 The Rule (2024) Theater", 1930, "theater");
     manual_save_to_csv("Backup Movie Test (2025)", 1931, "backup");
-    manual_save_to_csv("Private Channel Movie (2025)", 1932, "private");
-    manual_save_to_csv("Any Channel Movie (2025)", 1933, "any");
+    manual_save_to_csv("Private Channel 1 Movie (2025)", 1932, "private1");
+    manual_save_to_csv("Private Channel 2 Movie (2025)", 1933, "private2");
+    manual_save_to_csv("Private Channel 3 Movie (2025)", 1934, "private3");
     
     echo "<h1>✅ Test Movies Added</h1>";
-    echo "<p>All 10 test movies saved successfully!</p>";
+    echo "<p>All 11 test movies saved successfully!</p>";
     echo "<p><a href='?checkcsv=1'>Check CSV Data</a></p>";
     echo "<p><a href='?'>← Back to Status Page</a></p>";
     exit;
