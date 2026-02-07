@@ -1,4 +1,32 @@
 <?php
+// Create required directories and files
+if (!file_exists('backups')) {
+    mkdir('backups', 0777, true);
+}
+
+$required_files = [
+    'movies.csv' => "movie_name,message_id,channel_id\n",
+    'users.json' => '{"users": {}, "total_requests": 0, "message_logs": [], "daily_stats": {}}',
+    'bot_stats.json' => '{"total_movies": 0, "total_users": 0, "total_searches": 0, "total_downloads": 0, "successful_searches": 0, "failed_searches": 0, "daily_activity": {}, "last_updated": "' . date('Y-m-d H:i:s') . '"}',
+    'movie_requests.json' => '{"requests": [], "pending_approval": [], "completed_requests": [], "user_request_count": {}}',
+    'bot_activity.log' => '[' . date('Y-m-d H:i:s') . "] SYSTEM: Bot initialized\n",
+    'requests.json' => '[]'
+];
+
+foreach ($required_files as $file => $content) {
+    if (!file_exists($file)) {
+        file_put_contents($file, $content);
+    }
+}
+
+// Set permissions
+chmod('backups', 0777);
+foreach (['movies.csv', 'users.json', 'bot_stats.json', 'movie_requests.json', 'bot_activity.log', 'requests.json'] as $file) {
+    if (file_exists($file)) {
+        chmod($file, 0666);
+    }
+}
+
 // ==============================
 // RENDER.COM SPECIFIC STARTUP
 // ==============================
