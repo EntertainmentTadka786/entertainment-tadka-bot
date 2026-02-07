@@ -23,9 +23,18 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . .
 
-# Create necessary directories
+# Create necessary directories with error handling
 RUN mkdir -p backups \
     && chmod 777 backups \
+    # Create empty files if they don't exist
+    && { [ ! -f "movies.csv" ] && touch movies.csv; } \
+    && { [ ! -f "users.json" ] && touch users.json; } \
+    && { [ ! -f "bot_stats.json" ] && touch bot_stats.json; } \
+    && { [ ! -f "movie_requests.json" ] && touch movie_requests.json; } \
+    && { [ ! -f "bot_activity.log" ] && touch bot_activity.log; } \
+    && { [ ! -f "error.log" ] && touch error.log; } \
+    && { [ ! -f "bot.php" ] && touch bot.php; } \
+    # Set permissions
     && chmod 777 *.csv *.json *.log \
     && chmod +x bot.php
 
