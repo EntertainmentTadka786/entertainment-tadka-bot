@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  telegram-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: entertainment-tadka-bot
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - ADMIN_ID=${ADMIN_ID}
+      - PORT=80
+      - TZ=Asia/Kolkata
+    volumes:
+      - ./movies.csv:/var/www/html/movies.csv
+      - ./users.json:/var/www/html/users.json
+      - ./bot_stats.json:/var/www/html/bot_stats.json
+      - ./movie_requests.json:/var/www/html/movie_requests.json
+      - ./bot_activity.log:/var/www/html/bot_activity.log
+      - ./error.log:/var/www/html/error.log
+      - ./backups:/var/www/html/backups
+    networks:
+      - bot-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Database for future expansion
+  # mysql:
+  #   image: mysql:8.0
+  #   container_name: bot-db
+  #   restart: unless-stopped
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+  #     - MYSQL_DATABASE=${DB_DATABASE}
+  #     - MYSQL_USER=${DB_USER}
+  #     - MYSQL_PASSWORD=${DB_PASSWORD}
+  #   volumes:
+  #     - db_data:/var/lib/mysql
+  #     - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   networks:
+  #     - bot-network
+  #   ports:
+  #     - "3306:3306"
+
+  # Optional: phpMyAdmin for database management
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin
+  #   container_name: bot-phpmyadmin
+  #   restart: unless-stopped
+  #   environment:
+  #     - PMA_HOST=mysql
+  #     - PMA_PORT=3306
+  #     - PMA_ARBITRARY=1
+  #   ports:
+  #     - "8081:80"
+  #   networks:
+  #     - bot-network
+  #   depends_on:
+  #     - mysql
+
+networks:
+  bot-network:
+    driver: bridge
+
+volumes:
+  db_data:

@@ -1,0 +1,90 @@
+
+## 10. `.gitignore`
+
+```gitignore
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+error.log
+bot_activity.log
+*.log
+logs/
+
+# Backup files
+backups/
+*.bak
+*.backup
+
+# CSV files (can be large)
+movies.csv
+
+# JSON data files
+users.json
+bot_stats.json
+movie_requests.json
+
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# Composer
+vendor/
+composer.lock
+
+# Node.js
+node_modules/
+package-lock.json
+
+# Docker
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+
+# Development tools
+phpunit.xml
+*.test.php
+
+# OS generated files
+ehthumbs.db
+Icon?
+._*
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# PHP
+.phpunit.result.cache
+
+# Local Overrides
+*.local.php
